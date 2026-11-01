@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Listrik PLN - WattWise</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>body{font-family:'Space Grotesk',sans-serif;background:#0A0A0F;color:white} .mono{font-family:'JetBrains Mono'}</style>
+</head>
+<body class="p-4">
+<div class="max-w-5xl mx-auto">
+  <div class="text-center py-5">
+    <h1 class="text-4xl font-bold">WATT<span class="text-[#00FFC2]">WISE</span></h1>
+    <p class="mono text-[11px] text-zinc-500 mt-2">KALKULATOR LISTRIK PLN RESMI 2026</p>
+  </div>
+
+  <!-- 1. DAFTAR ALAT PALING ATAS -->
+  <div class="bg-zinc-900 rounded-[24px] p-5 border border-zinc-800 mb-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-bold text-sm">⚡ DAFTAR ALAT ELEKTRONIK</h2>
+      <div class="flex gap-2">
+        <select id="tarif" class="bg-black border border-zinc-700 rounded-xl p-2 mono text-[11px]">
+          <option value="415">450VA - Rp415</option>
+          <option value="605">900VA Subsidi - Rp605</option>
+          <option value="1352">900VA - Rp1.352</option>
+          <option value="1444.7" selected>1300VA/2200VA - Rp1.444,7</option>
+          <option value="1699.53">3500VA+ - Rp1.699,53</option>
+        </select>
+        <button onclick="add()" class="bg-[#00FFC2] text-black font-bold px-4 rounded-xl text-[11px]">+ ALAT</button>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-12 gap-2 mono text-[10px] text-zinc-500 px-3 mb-2">
+      <div class="col-span-5">NAMA ALAT</div>
+      <div class="col-span-2 text-center">WATT</div>
+      <div class="col-span-2 text-center">JAM/HARI</div>
+      <div class="col-span-2 text-center">JUMLAH</div>
+      <div class="col-span-1"></div>
+    </div>
+    <div id="list" class="space-y-2"></div>
+    
+    <button onclick="hitung()" class="w-full mt-4 bg-white text-black font-bold py-4 rounded-full text-sm">HITUNG TAGIHAN →</button>
+  </div>
+
+  <!-- 2. HASIL DI BAWAH -->
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="bg-gradient-to-br from-[#00FFC2]/20 to-[#7C4DFF]/20 border border-[#00FFC2]/30 rounded-[24px] p-6 text-center">
+      <p class="mono text-[10px] text-zinc-400">ESTIMASI TAGIHAN 30 HARI</p>
+      <h2 id="kwh" class="text-5xl font-bold mono mt-3">0 kWh</h2>
+      <h2 id="rp" class="text-4xl font-bold text-[#FFE600] mt-2">Rp 0</h2>
+      <p id="hari" class="mono text-[11px] text-zinc-400 mt-3">-</p>
+    </div>
+    <div class="bg-zinc-900 rounded-[24px] p-4 border border-zinc-800">
+      <h3 class="font-bold text-xs mb-2">📝 CARA PENGHITUNGAN LENGKAP</h3>
+      <pre id="cara" class="mono text-[11px] text-zinc-300 bg-black p-3 rounded-xl whitespace-pre-wrap min-h-[280px] leading-5">Klik HITUNG untuk melihat cara...</pre>
+      <button onclick="navigator.clipboard.writeText(document.getElementById('cara').innerText);alert('Tercopy!')" class="w-full mt-3 bg-zinc-800 py-2.5 rounded-xl mono text-[10px]">COPY CARA PERHITUNGAN</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data=[
+{n:"Kulkas",w:100,j:24,q:1},
+{n:"AC 1/2 PK",w:400,j:8,q:1},
+{n:"Lampu LED",w:15,j:12,q:5},
+]
+function add(){data.push({n:"Alat Baru",w:100,j:3,q:1});render()}
+function render(){
+ let c=document.getElementById('list');c.innerHTML="";
+ data.forEach((d,i)=>{
+  c.innerHTML+=`<div class="grid grid-cols-12 gap-2 bg-black p-3 rounded-xl items-center">
+  <input value="${d.n}" oninput="data[${i}].n=this.value" class="col-span-5 bg-transparent border-b border-zinc-700 mono text-xs p-1 outline-none">
+  <input type="number" value="${d.w}" oninput="data[${i}].w=this.value" class="col-span-2 bg-zinc-800 rounded-lg p-2 mono text-xs text-center">
+  <input type="number" value="${d.j}" oninput="data[${i}].j=this.value" class="col-span-2 bg-zinc-800 rounded-lg p-2 mono text-xs text-center">
+  <input type="number" value="${d.q}" oninput="data[${i}].q=this.value" class="col-span-2 bg-zinc-800 rounded-lg p-2 mono text-xs text-center">
+  <button onclick="data.splice(${i},1);render();hitung()" class="col-span-1 text-red-400 font-bold">×</button>
+  </div>`
+ })
+}
+function hitung(){
+ const tarif=parseFloat(document.getElementById('tarif').value);
+ let totalWh=0, detail="";
+ data.forEach((d,i)=>{let wh=d.w*d.j*d.q; totalWh+=wh; detail+=`${i+1}. ${d.n} = ${d.w}W × ${d.j}j × ${d.q} = ${wh}Wh = ${(wh/1000).toFixed(2)} kWh/hari\n`});
+ let kwhHari=totalWh/1000, kwhBulan=kwhHari*30, biaya=kwhBulan*tarif, ppj=biaya*0.03, total=biaya+ppj;
+ document.getElementById('kwh').innerText=kwhBulan.toFixed(2)+" kWh";
+ document.getElementById('rp').innerText="Rp "+Math.round(total).toLocaleString('id-ID');
+ document.getElementById('hari').innerText=`${kwhHari.toFixed(2)} kWh/hari | Rp ${Math.round(total/30).toLocaleString('id-ID')}/hari`;
+ document.getElementById('cara').innerText=`RUMUS: (Watt × Jam × Jumlah) / 1000 = kWh\n\n${detail}\nTOTAL: ${totalWh} Wh/hari = ${kwhHari.toFixed(3)} kWh/hari\nBULANAN: ${kwhHari.toFixed(3)} × 30 = ${kwhBulan.toFixed(2)} kWh\n\nBIAYA = ${kwhBulan.toFixed(2)} × Rp${tarif} = Rp ${Math.round(biaya).toLocaleString('id-ID')}\nPPJ 3% = Rp ${Math.round(ppj).toLocaleString('id-ID')}\n\nTOTAL = Rp ${Math.round(total).toLocaleString('id-ID')} / BULAN`;
+}
+render();hitung();
+</script>
+</body>
+</html>
